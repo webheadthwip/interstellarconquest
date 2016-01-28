@@ -1,0 +1,49 @@
+#pragma strict
+var randomDev: int;
+var planetTarget : Transform;         // Object that this label should follow
+static var offset = Vector3.right;        // Units in world space to offset; 1 unit above object by default
+var clampToScreen = false;      // If true, label will be visible even if object is off screen
+var clampBorderSize = .05;      // How much viewport space to leave at the borders when a label is being clamped
+var useMainCamera = true;       // Use the camera tagged MainCamera
+var cameraToUse : Camera;       // Only use this if useMainCamera is false
+private var cam : Camera;
+private var thisTransform : Transform;
+private var camTransform : Transform;
+var distance: int;
+var mouseOrbitScript: MouseOrbitZoom;
+var randomGrade: String;
+var planetGuiScript: PlanetGUI;
+function Start () {
+randomDev = Random.Range(5,11);
+var gradeArray : String[] = ["A", "B", "C", "D"];
+       randomGrade = gradeArray[Random.Range(0, gradeArray.Length)];
+ 	thisTransform = transform;
+    if (useMainCamera)
+        cam = Camera.main;
+    else
+        cam = cameraToUse;
+    camTransform = cam.transform;
+}
+
+function Update () {
+if(planetGuiScript.showPlanetDetails == true)
+	{
+//----------displays random development cost-----------
+		guiText.material.color = Color.blue; 
+		guiText.text = "0" +randomGrade;
+		offset = Vector3((planetTarget.localScale.x *.5), 0, 0);
+		//----------Gets the GUIText to follow camera-----------
+	        if (clampToScreen) {
+	            var relativePosition = camTransform.InverseTransformPoint(planetTarget.position);
+	            relativePosition.z = Mathf.Max(relativePosition.z, 1.0);
+	            thisTransform.position = cam.WorldToViewportPoint(camTransform.TransformPoint(relativePosition + offset));
+	            thisTransform.position = Vector3(Mathf.Clamp(thisTransform.position.x, clampBorderSize, 1.0-clampBorderSize),
+	                                             Mathf.Clamp(thisTransform.position.y, clampBorderSize, 1.0-clampBorderSize),
+	                                             thisTransform.position.z);
+	        }
+	        else {
+	            thisTransform.position = cam.WorldToViewportPoint(planetTarget.position + offset);
+	        }
+	}
+	//----------ends GUIText following camera---------------
+}
